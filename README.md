@@ -1,8 +1,8 @@
-# roi-cm-test
+# roi-cm-test 
+## Trial Task
 
-Trial Task
+Make fork of this project.
 
-Unpack test.zip archive.
 Upload all code to GitHub, keep original code in master branch, make your changes in develop branch.
 
 
