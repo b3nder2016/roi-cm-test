@@ -1,0 +1,31 @@
+---
+ - name: installing docker
+   apt: name={{ item }} state=present
+   with_items:
+    - docker.io
+    - python-pip
+   register: pkgs_installed
+
+ - command: pip install docker-py
+   when: pkgs_installed|success
+   register: docker_ready
+
+ - copy:
+    src: "{{ playbook_dir }}/TestWebApp/target/TestWebApp.war"
+    dest: "{{ playbook_dir }}/roles/docker/files"
+
+ - name: creating application docker image
+   when: docker_ready|success
+   docker_image:
+     path: "{{ playbook_dir}}/roles/docker/files"
+     name: testwebappimg
+   register: docker_image_ready
+
+ - name: starting TestWebApp container
+   when: docker_image_ready|success
+   docker_container:
+     name: testwebapp
+     image: testwebappimg
+     state: started
+     ports:
+       - 8081:8080

@@ -1,0 +1,12 @@
+---
+- hosts: all
+  become: yes
+
+  tasks:
+    - name: deploying TestWebApp
+      copy:
+        src: /root/TestWebApp.war
+        dest: /var/lib/tomcat8/webapps/TestWebApp.war
+        owner: tomcat8
+        group: tomcat8
+        mode: 0644

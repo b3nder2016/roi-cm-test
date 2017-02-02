@@ -1,0 +1,38 @@
+---
+ - apt: update_cache=yes cache_valid_time=3600
+
+ - name: install all the necessary packages
+   apt: name="{{ item }}" state=present
+   with_items:
+    - maven
+    - openjdk-8-jdk
+    - python
+   register: pkgs_installed
+
+ - name: fixing versions
+   when: pkgs_installed|success
+   shell: "{{ playbook_dir }}/fixversions.py"
+   register: versions_fixed
+
+ - name: building TestWebApp
+   when: versions_fixed|success
+   shell: cd  {{ playbook_dir }} && mvn clean install
+   register: app_built
+
+ - name: deploying TestWebApp
+   when: app_built|success
+   copy:
+    src: "{{ playbook_dir }}/TestWebApp/target/TestWebApp.war"
+    dest: /var/lib/tomcat8/webapps/TestWebApp.war
+    owner: tomcat8
+    group: tomcat8
+    mode: 0644
+
+ - name: copying TestWebApp for docker
+   when: app_built|success
+   copy:
+    src: "{{ playbook_dir }}/TestWebApp/target/TestWebApp.war"
+    dest: "{{ playbook_dir }}/roles/docker/files/TestWebApp.war"
+    owner: nobody
+    group: nogroup
+    mode: 0644
